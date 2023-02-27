@@ -47,6 +47,9 @@ function main() {
         }
     }
 
+    console.log(`Checking repo: ${env.GITHUB_REPOSITORY}`);
+    console.log(`Checking SHA: ${env.GITHUB_SHA}`);
+
 
     //request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}build-number-`, null, (err, status, result) => {
     //})

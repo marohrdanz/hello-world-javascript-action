@@ -75,6 +75,7 @@ function main() {
             nrTags = [];
        } else if (status === 200) {
             const regexString = `/${prefix}(\\d+)$`;
+            console.log('regexString: ', regexString);
             const regex = new RegExp(regexString);
             nrTags = result.filter(d => d.ref.match(regex));
             const MAX_OLD_NUMBERS = 5; //One or two ref deletes might fail, but if we have lots then there's something wrong!

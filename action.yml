@@ -1,12 +1,12 @@
-name: 'Hello World'
-description: 'Greet someone, record the time, and test build number'
+name: 'Create Build Number Tag'
+description: 'Create build number tag in repo'
 inputs:
   prefix:
-    description: 'Prefix for build-number<num> tag'
+    description: 'Prefix for tag'
     required: false
     default: 'build-number-'
   token:
-    description: 'GitHub token to create and deltet refs'
+    description: 'GitHub token to create and delete refs'
     required: false # only needed for very first job
 outputs:
   build_number:

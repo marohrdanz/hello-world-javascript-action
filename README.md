@@ -1,23 +1,21 @@
-# Hello world javascript action
+# Create Build Number Tag
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This action creates a tag with the build number in the repo.
 
 ## Inputs
 
-### `who-to-greet`
-
-**Required** The name of the person to greet. Default `"World"`.
+- `prefix`: Prefix for tag. Default: 'build-number-'
+- `token`: GitHub token to create tag
 
 ## Outputs
 
-### `time`
-
-The time we greeted you.
+- `build_number`: New build number. Output in case subsequent steps want to use it
 
 ## Example usage
 
 ```yaml
 uses: actions/hello-world-javascript-action@v1.1
 with:
-  who-to-greet: 'Mona the Octocat'
+  token: ${{ secrets.TOKEN }}
+  prefix: 'my-build-number-'
 ```

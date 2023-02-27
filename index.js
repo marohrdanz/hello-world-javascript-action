@@ -71,10 +71,10 @@ function request(method, path, data, callback) {
 }
 
 function main() {
-    const path = 'BUILD_NUMBER/BUILD_NUMBER';
+    //const path = 'BUILD_NUMBER/BUILD_NUMBER';
     const prefix = env.INPUT_PREFIX ? `${env.INPUT_PREFIX}-` : '';
     //See if we've already generated the build number and are in later steps...
-    if (fs.existsSync(path)) {
+    /*if (fs.existsSync(path)) {
         let buildNumber = fs.readFileSync(path);
         console.log(`Build number already generated in earlier jobs, using build number ${buildNumber}...`);
         //Setting the output and a environment variable to new build number...
@@ -83,7 +83,7 @@ function main() {
         return;
     } else {
         console.log("In the else block");
-    }
+    }*/
 
     //Some sanity checking:
     for (let varName of ['GITHUB_REPOSITORY', 'GITHUB_SHA']) {
@@ -140,7 +140,7 @@ function main() {
             fs.writeFileSync(process.env.GITHUB_OUTPUT, `build_number=${nextBuildNumber}`);
             fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${nextBuildNumber}`);
             //Save to file so it can be used for next jobs...
-            fs.writeFileSync('BUILD_NUMBER', nextBuildNumber.toString());
+            //fs.writeFileSync('BUILD_NUMBER', nextBuildNumber.toString());
          });
     });
 

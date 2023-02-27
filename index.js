@@ -38,7 +38,7 @@ function request(method, path, data, callback) {
                 'Content-Type': 'application/json',
                 'Content-Length': data ? data.length : 0,
                 'Accept-Encoding' : 'gzip',
-                'Authorization' : `token ${secrets.TOKEN}`,
+                'Authorization' : `token ${{ secrets.TOKEN }}`,
                 'User-Agent' : 'GitHub Action - development'
             }
         }

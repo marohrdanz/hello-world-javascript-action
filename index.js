@@ -17,6 +17,11 @@ try {
   core.setFailed(error.message);
 }
 
+function fail(message, exitCode=1) {
+    console.log(`::error::${message}`);
+    process.exit(exitCode);
+}
+
 function main() {
 
     const path = 'BUILD_NUMBER/BUILD_NUMBER';

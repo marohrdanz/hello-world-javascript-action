@@ -20,11 +20,11 @@ try {
 
 function fail(message, exitCode=1) {
     console.log(`::error::${message}`);
+    core.setFailed(message);
     process.exit(exitCode);
 }
 
 function request(method, path, data, callback) {
-    
     try {
         if (data) {
             data = JSON.stringify(data);
@@ -71,10 +71,8 @@ function request(method, path, data, callback) {
 }
 
 function main() {
-
     const path = 'BUILD_NUMBER/BUILD_NUMBER';
     const prefix = env.INPUT_PREFIX ? `${env.INPUT_PREFIX}-` : '';
-
     //See if we've already generated the build number and are in later steps...
     if (fs.existsSync(path)) {
         let buildNumber = fs.readFileSync(path);
@@ -113,9 +111,11 @@ function main() {
                 fail(`ERROR: Too many ${prefix}build-number- refs in repository, found ${nrTags.length}, expected only 1. Check your tags!`);
             }
             //Existing build numbers:
+            console.log("nrTags:")
+            console.log(nrTags)
             let nrs = nrTags.map(t => parseInt(t.ref.match(/-(\d+)$/)[1]));
             let currentBuildNumber = Math.max(...nrs);
-            console.log(`Last build nr was ${currentBuildNumber}.`);
+            console.log(`Last build number was ${currentBuildNumber}.`);
             nextBuildNumber = currentBuildNumber + 1;
             console.log(`Updating build counter to ${nextBuildNumber}...`);
         } else {

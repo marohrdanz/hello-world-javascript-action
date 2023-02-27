@@ -11,9 +11,8 @@ inputs:
 outputs:
   time:
     description: 'The time we greeted you'
-  outputs:
-    build_number:
-      description: 'Build tag number'
+  build_number:
+    description: 'Build tag number'
 runs:
   using: 'node16'
   main: 'index.js'

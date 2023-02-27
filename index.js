@@ -125,6 +125,23 @@ function main() {
                 fail(`Getting build-number refs failed with http status ${status}, error: ${JSON.stringify(result)}`);
             } 
        }
+       let newRefData = {
+            ref:`refs/tags/${prefix}build-number-${nextBuildNumber}`, 
+            sha: env.GITHUB_SHA
+        };
+
+        request('POST', `/repos/${env.GITHUB_REPOSITORY}/git/refs`, newRefData, (err, status, result) => {
+            if (status !== 201 || err) {
+                fail(`Failed to create new build-number ref. Status: ${status}, err: ${err}, result: ${JSON.stringify(result)}`);
+            }
+
+            console.log(`Successfully updated build number to ${nextBuildNumber}`);
+            //Setting the output and a environment variable to new build number...
+            fs.writeFileSync(process.env.GITHUB_OUTPUT, `build_number=${nextBuildNumber}`);
+            fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${nextBuildNumber}`);
+            //Save to file so it can be used for next jobs...
+            fs.writeFileSync('BUILD_NUMBER', nextBuildNumber.toString());
+         });
     });
 
 }

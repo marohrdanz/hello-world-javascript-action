@@ -1,19 +1,14 @@
 name: 'Hello World'
 description: 'Greet someone, record the time, and test build number'
 inputs:
-  who-to-greet:
-    description: 'Who to greet'
-    required: true
-    default: 'World'
   prefix:
     description: 'Prefix for build-number<num> tag'
     required: false
+    default: 'build-number-'
   token:
     description: 'GitHub token to create and deltet refs'
     required: false # only needed for very first job
 outputs:
-  time:
-    description: 'The time we greeted you'
   build_number:
     description: 'Build tag number'
 runs:

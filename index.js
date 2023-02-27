@@ -1,26 +1,11 @@
-const core = require('@actions/core');
 const github = require('@actions/github');
 const https = require('https');
 const fs = require('fs')
 const zlib = require('zlib');
 env = process.env;
 
-try {
-  // `who-to-greet` input defined in action metadata file
-  const nameToGreet = core.getInput('who-to-greet');
-  console.log(`Hello ${nameToGreet}!`);
-  const time = (new Date()).toTimeString();
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
-} catch (error) {
-  core.setFailed(error.message);
-}
-
 function fail(message, exitCode=1) {
     console.log(`::error::${message}`);
-    core.setFailed(message);
     process.exit(exitCode);
 }
 
@@ -71,21 +56,8 @@ function request(method, path, data, callback) {
 }
 
 function main() {
-    //const path = 'BUILD_NUMBER/BUILD_NUMBER';
     const prefix = env.INPUT_PREFIX ? `${env.INPUT_PREFIX}-` : '';
-    //See if we've already generated the build number and are in later steps...
-    /*if (fs.existsSync(path)) {
-        let buildNumber = fs.readFileSync(path);
-        console.log(`Build number already generated in earlier jobs, using build number ${buildNumber}...`);
-        //Setting the output and a environment variable to new build number...
-        fs.writeFileSync(process.env.GITHUB_OUTPUT, `build_number=${buildNumber}`);
-        fs.writeFileSync(process.env.GITHUB_ENV, `BUILD_NUMBER=${buildNumber}`);
-        return;
-    } else {
-        console.log("In the else block");
-    }*/
 
-    //Some sanity checking:
     for (let varName of ['GITHUB_REPOSITORY', 'GITHUB_SHA']) {
         if (!env[varName]) {
             fail(`ERROR: Environment variable ${varName} is not defined.`);
@@ -96,19 +68,18 @@ function main() {
     console.log(`Checking SHA: ${env.GITHUB_SHA}`);
 
 
-    request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}build-number-`, null, (err, status, result) => {
+    request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}`, null, (err, status, result) => {
        if (status === 404) {
             console.log('No build-number ref available, starting at 1.');
             nextBuildNumber = 1;
             nrTags = [];
        } else if (status === 200) {
-            const regexString = `/${prefix}build-number-(\\d+)$`;
+            const regexString = `/${prefix}(\\d+)$`;
             const regex = new RegExp(regexString);
             nrTags = result.filter(d => d.ref.match(regex));
-            
             const MAX_OLD_NUMBERS = 5; //One or two ref deletes might fail, but if we have lots then there's something wrong!
             if (nrTags.length > MAX_OLD_NUMBERS) {
-                fail(`ERROR: Too many ${prefix}build-number- refs in repository, found ${nrTags.length}, expected only 1. Check your tags!`);
+                fail(`ERROR: Too many ${prefix} refs in repository, found ${nrTags.length}, expected only 1. Check your tags!`);
             }
             //Existing build numbers:
             console.log("nrTags:")
@@ -126,7 +97,7 @@ function main() {
             } 
        }
        let newRefData = {
-            ref:`refs/tags/${prefix}build-number-${nextBuildNumber}`, 
+            ref:`refs/tags/${prefix}${nextBuildNumber}`, 
             sha: env.GITHUB_SHA
         };
 

@@ -75,6 +75,7 @@ function main() {
             nrTags = [];
        } else if (status === 200) {
             const regexString = `/${prefix}(\\d+)$`;
+            console.log(`prefix: ${prefix}`);
             console.log('regexString: ', regexString);
             const regex = new RegExp(regexString);
             nrTags = result.filter(d => d.ref.match(regex));

@@ -41,11 +41,16 @@ function main() {
 
     //Some sanity checking:
     for (let varName of ['GITHUB_REPOSITORY', 'GITHUB_SHA']) {
-        console.log("chacking varName: ${varName}");
+        console.log(`chacking varName: ${varName}`);
         if (!env[varName]) {
             fail(`ERROR: Environment variable ${varName} is not defined.`);
         }
     }
+
+
+    //request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}build-number-`, null, (err, status, result) => {
+    //})
+
 }
 
 main();

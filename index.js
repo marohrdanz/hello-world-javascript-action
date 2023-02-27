@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const https = require('https');
 const fs = require('fs')
+const zlib = require('zlib');
 env = process.env;
 
 try {
@@ -20,6 +21,53 @@ try {
 function fail(message, exitCode=1) {
     console.log(`::error::${message}`);
     process.exit(exitCode);
+}
+
+function request(method, path, data, callback) {
+    
+    try {
+        if (data) {
+            data = JSON.stringify(data);
+        }  
+        const options = {
+            hostname: 'api.github.com',
+            port: 443,
+            path,
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data ? data.length : 0,
+                'Accept-Encoding' : 'gzip',
+                'Authorization' : `token ${env.INPUT_TOKEN}`,
+                'User-Agent' : 'GitHub Action - development'
+            }
+        }
+        const req = https.request(options, res => {
+            let chunks = [];
+            res.on('data', d => chunks.push(d));
+            res.on('end', () => {
+                let buffer = Buffer.concat(chunks);
+                if (res.headers['content-encoding'] === 'gzip') {
+                    zlib.gunzip(buffer, (err, decoded) => {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            callback(null, res.statusCode, decoded && JSON.parse(decoded));
+                        }
+                    });
+                } else {
+                    callback(null, res.statusCode, buffer.length > 0 ? JSON.parse(buffer) : null);
+                }
+            });
+            req.on('error', err => callback(err));
+        });
+        if (data) {
+            req.write(data);
+        }
+        req.end();
+    } catch(err) {
+        callback(err);
+    }
 }
 
 function main() {
@@ -51,8 +99,28 @@ function main() {
     console.log(`Checking SHA: ${env.GITHUB_SHA}`);
 
 
-    //request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}build-number-`, null, (err, status, result) => {
-    //})
+    request('GET', `/repos/${env.GITHUB_REPOSITORY}/git/refs/tags/${prefix}build-number-`, null, (err, status, result) => {
+       if (status === 404) {
+            console.log('No build-number ref available, starting at 1.');
+            nextBuildNumber = 1;
+            nrTags = [];
+       } else if (status === 200) {
+            const regexString = `/${prefix}build-number-(\\d+)$`;
+            const regex = new RegExp(regexString);
+            nrTags = result.filter(d => d.ref.match(regex));
+            
+            const MAX_OLD_NUMBERS = 5; //One or two ref deletes might fail, but if we have lots then there's something wrong!
+            if (nrTags.length > MAX_OLD_NUMBERS) {
+                fail(`ERROR: Too many ${prefix}build-number- refs in repository, found ${nrTags.length}, expected only 1. Check your tags!`);
+            }
+            
+            //Existing build numbers:
+            let nrs = nrTags.map(t => parseInt(t.ref.match(/-(\d+)$/)[1]));
+    
+            let currentBuildNumber = Math.max(...nrs);
+            console.log(`Last build nr was ${currentBuildNumber}.`);
+       }
+    })
 
 }
 

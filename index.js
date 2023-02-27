@@ -33,6 +33,14 @@ function main() {
     } else {
         console.log("In the else block");
     }
+
+    //Some sanity checking:
+    for (let varName of ['INPUT_TOKEN', 'GITHUB_REPOSITORY', 'GITHUB_SHA']) {
+        console.log("chacking varName: ${varName}");
+        if (!env[varName]) {
+            fail(`ERROR: Environment variable ${varName} is not defined.`);
+        }
+    }
 }
 
 main();

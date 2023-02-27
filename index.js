@@ -89,7 +89,6 @@ function main() {
 
     //Some sanity checking:
     for (let varName of ['GITHUB_REPOSITORY', 'GITHUB_SHA']) {
-        console.log(`chacking varName: ${varName}`);
         if (!env[varName]) {
             fail(`ERROR: Environment variable ${varName} is not defined.`);
         }
@@ -113,14 +112,20 @@ function main() {
             if (nrTags.length > MAX_OLD_NUMBERS) {
                 fail(`ERROR: Too many ${prefix}build-number- refs in repository, found ${nrTags.length}, expected only 1. Check your tags!`);
             }
-            
             //Existing build numbers:
             let nrs = nrTags.map(t => parseInt(t.ref.match(/-(\d+)$/)[1]));
-    
             let currentBuildNumber = Math.max(...nrs);
             console.log(`Last build nr was ${currentBuildNumber}.`);
+            nextBuildNumber = currentBuildNumber + 1;
+            console.log(`Updating build counter to ${nextBuildNumber}...`);
+        } else {
+            if (err) {
+                fail(`Failed to get refs. Error: ${err}, status: ${status}`);
+            } else {
+                fail(`Getting build-number refs failed with http status ${status}, error: ${JSON.stringify(result)}`);
+            } 
        }
-    })
+    });
 
 }
 
